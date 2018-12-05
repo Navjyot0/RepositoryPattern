@@ -1,0 +1,96 @@
+Repository Pattern
+It provides simple abstraction of data, so that your application can work with simple abstraction.
+Adding, removing, updating, and selecting items from this collection is done through a series of straightforward methods, without the need to deal with database concerns like connections, commands, cursors, or readers.
+
+There are many different ways to implement the Repository pattern. Let’s consider a few of them, and their merits and drawbacks.
+
+1. Repository Per Entity or Business Object
+The simplest approach, especially with an existing system, is to create a new Repository implementation for each business object you need to store to or retrieve from your persistence layer.
+Further, you should only implement the specific methods you are calling in your application. 
+Avoid the trap of creating a “standard” repository class, base class, or default interface that you must implement for all repositories.
+
+2. Generic Repository Interface
+Another approach is to go ahead and create a simple, generic interface for your Repository. 
+You can constrain what kind of types it works with to be of a certain type, or to implement a certain interface (e.g. ensuring it has an Id property, as is done below using a base class).
+
+Example
+public interface IRepository<T> where T : EntityBase
+{
+    T GetById(int id);
+    IEnumerable<T> List();
+    IEnumerable<T> List(Expression<Func<T, bool>> predicate);
+    void Add(T entity);
+    void Delete(T entity);
+    void Edit(T entity);
+}
+
+public abstract class EntityBase
+{
+   public int Id { get; protected set; }
+}
+
+
+The advantage of this approach is that it ensures you have a common interface for working with any of your objects.
+You can also simplify the implementation by using a Generic Repository Implementation (below).
+Note that taking in a predicate eliminates the need to return an IQueryable, since any filter details can be passed into the repository.
+
+Generic Repository Implementation
+public class Repository<T> : IRepository<T> where T : EntityBase
+{
+    private readonly ApplicationDbContext _dbContext;
+
+    public Repository(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public virtual T GetById(int id)
+    {
+        return _dbContext.Set<T>().Find(id);
+    }
+
+    public virtual IEnumerable<T> List()
+    {
+        return _dbContext.Set<T>().AsEnumerable();
+    }
+
+    public virtual IEnumerable<T> List(System.Linq.Expressions.Expression<Func<T, bool>> predicate)
+    {
+        return _dbContext.Set<T>()
+               .Where(predicate)
+               .AsEnumerable();
+    }
+
+    public void Insert(T entity)
+    {
+        _dbContext.Set<T>().Add(entity);
+        _dbContext.SaveChanges();
+    }
+
+    public void Update(T entity)
+    {
+        _dbContext.Entry(entity).State = EntityState.Modified;
+        _dbContext.SaveChanges();
+    }
+
+    public void Delete(T entity)
+    {
+        _dbContext.Set<T>().Remove(entity);
+        _dbContext.SaveChanges();
+    }
+}
+
+Repository Pattern separates the data access logic and maps it to the entities in the business logic. 
+It works with the domain entities and performs data access logic. In the Repository pattern, the domain entities, the data access logic and the business logic talk to each other using interfaces. 
+It hides the details of data access from the business logic. 
+In other words, business logic can access the data object without having knowledge of the underlying data access architecture. 
+For example, in the Repository pattern, business logic is not aware whether the application is using LINQ to SQL or ADO.NET Entity Model ORM. 
+In the future, underlying data sources or architecture can be changed without affecting the business logic.
+
+There are various advantages of the Repository Pattern including:
+Business logic can be tested without need for an external source
+Database access logic can be tested separately
+No duplication of code
+Caching strategy for the datasource can be centralized
+Domain driven development is easier
+Centralizing the data access logic, so code maintainability is easier
