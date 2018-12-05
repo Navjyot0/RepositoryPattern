@@ -88,9 +88,23 @@ For example, in the Repository pattern, business logic is not aware whether the 
 In the future, underlying data sources or architecture can be changed without affecting the business logic.
 
 There are various advantages of the Repository Pattern including:
-Business logic can be tested without need for an external source
-Database access logic can be tested separately
-No duplication of code
-Caching strategy for the datasource can be centralized
-Domain driven development is easier
-Centralizing the data access logic, so code maintainability is easier
+-Business logic can be tested without need for an external source
+-Database access logic can be tested separately
+-No duplication of code
+-Caching strategy for the datasource can be centralized
+-Domain driven development is easier
+-Centralizing the data access logic, so code maintainability is easier
+
+It is not a good idea to access the database logic directly in the business logic. 
+Tight coupling of the database logic in the business logic make applications tough to test and extend further. 
+Direct access of the data in the business logic may cause problems such as:
+-Difficulty completing Unit Test of the business logic
+-Business logic cannot be tested without the dependencies of external systems like database
+-Duplicate data access code throughout the business layer (Don’t Repeat Yourself in code)
+
+
+Ref Links : 
+https://deviq.com/repository-pattern/
+https://medium.com/falafel-software/implement-step-by-step-generic-repository-pattern-in-c-3422b6da43fd
+https://www.c-sharpcorner.com/UploadFile/b1df45/getting-started-with-repository-pattern-using-C-Sharp/
+https://www.infoworld.com/article/3107186/application-development/how-to-implement-the-repository-design-pattern-in-c.html
